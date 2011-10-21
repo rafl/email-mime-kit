@@ -1,0 +1,18 @@
+{
+  "renderer": "TestRenderer",
+  "header": [
+    { "From" : "JEP <[% sender_address %]>" },
+    { "Subject" : "[% subject %]" },
+    { "To" : "[% recipient %]" }
+  ],
+  "alternatives": [
+    {
+      "type": "text/plain",
+      "path": "body.txt.tt"
+    },
+    {
+      "type": "text/html",
+      "path": "body.html.tt"
+    }
+  ]
+}
