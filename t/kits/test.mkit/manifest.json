@@ -37,7 +37,7 @@
     {
       "type": "application/pdf",
       "path": "bogus-report.pdf",
-      "attributes": { "filename": "report.pdf" }
+      "attributes": { "filename": "[% report_name %]" }
     }
   ]
 }

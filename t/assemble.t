@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2 * 23;
+use Test::More tests => 2 * 24;
 use lib 't/lib';
 
 use Email::MIME::Kit;
@@ -36,8 +36,9 @@ for my $args (
   }
 
   my $email = $kit->assemble({
-    friend   => TestFriend->new('Jimbo Johnson'),
-    how_long => '10 years',
+    friend      => TestFriend->new('Jimbo Johnson'),
+    how_long    => '10 years',
+    report_name => 'some-report.pdf',
   });
 
   isa_ok($email, 'Email::MIME', 'product of kit assembly');
@@ -59,6 +60,7 @@ for my $args (
   is(@top_rest, 0, "we got exactly 2 top-level parts");
   is($mp_alt->$bare_ct, 'multipart/alternative', 'first subpart is mp/a');
   is($pdf->$bare_ct, 'application/pdf', '2nd subpart is application/pdf');
+  is($pdf->header_obj->header('Content-Disposition'), 'attachment; filename="some-report.pdf"');
 
   {
     my ($txt, $html, $mp_rel, @alt_rest) = $mp_alt->subparts;

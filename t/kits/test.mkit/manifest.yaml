@@ -32,4 +32,4 @@ attachments:
 - type: application/pdf
   path: bogus-report.pdf
   attributes:
-    filename: report.pdf
+    filename: "[% report_name %]"

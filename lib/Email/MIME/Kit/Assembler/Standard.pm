@@ -25,7 +25,6 @@ sub BUILD {
   my ($self) = @_;
   $self->_setup_content_ids;
   $self->_pick_and_set_renderer;
-  $self->_build_subassemblies;
 }
 
 has parent => (
@@ -56,6 +55,8 @@ sub assemble {
 
   Carp::croak("you must provide only one of body, path, or alternatives")
     unless (grep {$_} $has_body, $has_path, $has_alts) == 1;
+
+  $self->_assemble_subassemblies($stash);
 
   my $assembly_method = $has_body ? '_assemble_from_manifest_body'
                       : $has_path ? '_assemble_from_kit'
@@ -186,16 +187,16 @@ has _body => (
   writer => '_set_body',
 );
 
-sub _build_subassemblies {
-  my ($self) = @_;
-  
+sub _assemble_subassemblies {
+  my ($self, $stash) = @_;
+
   if (my $body = $self->manifest->{body}) {
     $self->_set_body($body);
   }
 
   for my $attach (@{ $self->manifest->{attachments} || [] }) {
     my $assembler = $self->kit->_assembler_from_manifest($attach, $self);
-    $assembler->_set_attachment_info($attach);
+    $assembler->_set_attachment_info($attach, $stash);
     push @{ $self->_attachments }, $assembler;
   }
 
@@ -206,14 +207,16 @@ sub _build_subassemblies {
 }
 
 sub _set_attachment_info {
-  my ($self, $manifest) = @_;
+  my ($self, $manifest, $stash) = @_;
 
   my $attr = $manifest->{attributes} ||= {};
 
   $attr->{encoding}    = 'base64' unless exists $attr->{encoding};
   $attr->{disposition} = 'attachment' unless exists $attr->{disposition};
 
-  unless (exists $attr->{filename}) {
+  if (exists $attr->{filename}) {
+    $attr->{filename} = ${ $self->render(\$attr->{filename}, $stash) };
+  } else {
     my $filename;
     ($filename) = File::Basename::fileparse($manifest->{path})
       if $manifest->{path};
